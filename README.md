@@ -23,9 +23,23 @@ curl -s -u "${EMAIL}:${APIKEY}" \
 Note, I am using [jq] above to make the output more readable. You can leave
 off `| jq` if you prefer.
 
-Hopefully that works for you! Next, I am going to try and figure out the basics
-of writing a Terraform provider.
+Hopefully that works for you!
+
+## Terraform Provider Basics
+
+Terraform's guide on [Writing Custom Providers] was very helpful. I was able to
+throw together a skeleton of a provider. Next, I need to fill it with actual
+Confluence calls.
+
+To see it in action, you can run:
+
+```
+make
+terraform init
+terraform apply
+```
 
 [Confluence REST API Reference]: https://docs.atlassian.com/atlassian-confluence/REST/1000.0.0-SNAPSHOT/
 [Manage API Tokens]: https://id.atlassian.com/manage/api-tokens
 [jq]: https://stedolan.github.io/jq/
+[Writing Custom Providers]: https://www.terraform.io/docs/extend/writing-custom-providers.html

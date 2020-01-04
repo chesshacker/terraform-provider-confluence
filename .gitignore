@@ -1,1 +1,4 @@
 secrets.env
+terraform-provider-confluence
+.terraform
+terraform.tfstate*
