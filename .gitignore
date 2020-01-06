@@ -1,4 +1,4 @@
-secrets.env
+terraform.tfvars
 terraform-provider-confluence
 .terraform
 terraform.tfstate*

@@ -1,0 +1,18 @@
+<table>
+  <colgroup>
+    <col />
+  </colgroup>
+  <tbody>
+    <tr>
+      <th>Pet Name</th>
+    </tr>
+%{ for pet in pets ~}
+    <tr>
+      <td>
+        <p>${pet}</p>
+      </td>
+    </tr>
+%{ endfor ~}
+  </tbody>
+</table>
+<p><em>Managed by Terraform</em></p>
