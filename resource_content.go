@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
@@ -62,8 +63,9 @@ func resourceContent() *schema.Resource {
 				ForceNew: true,
 			},
 			"body": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
+				Type:             schema.TypeString,
+				Required:         true,
+				DiffSuppressFunc: resourceContentDiffBody,
 			},
 			"title": &schema.Schema{
 				Type:     schema.TypeString,
@@ -210,4 +212,11 @@ func resourceContentDelete(d *schema.ResourceData, m interface{}) error {
 	}
 	// d.SetId("") is automatically called assuming delete returns no errors
 	return nil
+}
+
+// Body was showing as requiring changes when there weren't any. It appears there
+// are some whitespace differences between the old and new. This supresses the
+// false differences by comparing the trimmed strings
+func resourceContentDiffBody(k, old, new string, d *schema.ResourceData) bool {
+	return strings.TrimSpace(old) == strings.TrimSpace(new)
 }
