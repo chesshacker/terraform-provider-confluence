@@ -46,6 +46,9 @@ func resourceContent() *schema.Resource {
 		Read:   resourceContentRead,
 		Update: resourceContentUpdate,
 		Delete: resourceContentDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
 			"type": &schema.Schema{
