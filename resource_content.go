@@ -1,9 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"fmt"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
@@ -98,53 +95,20 @@ func resourceContentCreate(d *schema.ResourceData, m interface{}) error {
 		},
 		Title: d.Get("title").(string),
 	}
-
-	body, err := json.Marshal(contentRequest)
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.Post("/wiki/rest/api/content", bytes.NewReader(body))
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("HTTP POST request error. Response code: %d", resp.StatusCode)
-	}
-
 	var contentResponse Content
-	err = json.NewDecoder(resp.Body).Decode(&contentResponse)
+	err := client.Post("/wiki/rest/api/content", contentRequest, &contentResponse)
 	if err != nil {
 		return err
 	}
-
-	// TODO: I feel like a lot of this response code checking and marshalling of
-	// the response could be hoisted up to the client, but I'm not exactly sure
-	// how I want it to look yet, so I am leaving it as-is for now.
-
 	d.SetId(contentResponse.Id)
 	return resourceContentRead(d, m)
 }
 
 func resourceContentRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-
-	resp, err := client.Get("/wiki/rest/api/content/" + d.Id() + "?expand=space,body.storage,version")
-	if err != nil {
-		d.SetId("")
-		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		d.SetId("")
-		return fmt.Errorf("HTTP GET request error. Response code: %d", resp.StatusCode)
-	}
-
 	var contentResponse Content
-	err = json.NewDecoder(resp.Body).Decode(&contentResponse)
+	u := "/wiki/rest/api/content/" + d.Id() + "?expand=space,body.storage,version"
+	err := client.Get(u, &contentResponse)
 	if err != nil {
 		d.SetId("")
 		return err
@@ -161,7 +125,6 @@ func resourceContentRead(d *schema.ResourceData, m interface{}) error {
 
 func resourceContentUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-
 	contentRequest := Content{
 		Type: d.Get("type").(string),
 		Space: &Space{
@@ -178,37 +141,20 @@ func resourceContentUpdate(d *schema.ResourceData, m interface{}) error {
 			Number: d.Get("version").(int) + 1,
 		},
 	}
-
-	body, err := json.Marshal(contentRequest)
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.Put("/wiki/rest/api/content/"+d.Id(), bytes.NewReader(body))
+	var contentResponse Content
+	err := client.Put("/wiki/rest/api/content/"+d.Id(), contentRequest, &contentResponse)
 	if err != nil {
 		d.SetId("")
 		return err
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return fmt.Errorf("HTTP PUT request error. Response code: %d", resp.StatusCode)
-	}
-
 	return resourceContentRead(d, m)
 }
 
 func resourceContentDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-
-	resp, err := client.Delete("/wiki/rest/api/content/" + d.Id())
+	err := client.Delete("/wiki/rest/api/content/" + d.Id())
 	if err != nil {
 		return err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 204 {
-		return fmt.Errorf("HTTP DELETE request error. Response code: %d", resp.StatusCode)
 	}
 	// d.SetId("") is automatically called assuming delete returns no errors
 	return nil
