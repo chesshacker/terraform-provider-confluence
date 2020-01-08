@@ -23,26 +23,18 @@ type NewClientInput struct {
 }
 
 func NewClient(input *NewClientInput) (*Client, error) {
-
-	// TODO: Is there a better way to build the *URL.url object? I'm worried that
-	// input.user contains an @ symbol... but it seems to work as-is.
-
-	u := "https://" + input.user + ":" + input.token + "@" + input.instance + ".atlassian.net"
-	baseURL, err := url.Parse(u)
-	if err != nil {
-		return nil, err
+	publicURL := url.URL{
+		Scheme: "https",
+		Host:   input.instance + ".atlassian.net",
 	}
-	u = "https://" + input.instance + ".atlassian.net"
-	publicURL, err := url.Parse(u)
-	if err != nil {
-		return nil, err
-	}
+	baseURL := publicURL
+	baseURL.User = url.UserPassword(input.user, input.token)
 	return &Client{
 		client: &http.Client{
 			Timeout: time.Second * 10,
 		},
-		baseURL:   baseURL,
-		publicURL: publicURL,
+		baseURL:   &baseURL,
+		publicURL: &publicURL,
 	}, nil
 }
 
