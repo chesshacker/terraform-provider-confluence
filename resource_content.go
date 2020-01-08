@@ -82,19 +82,7 @@ func resourceContent() *schema.Resource {
 
 func resourceContentCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-	contentRequest := Content{
-		Type: d.Get("type").(string),
-		Space: &Space{
-			Key: d.Get("space").(string),
-		},
-		Body: &Body{
-			Storage: &Storage{
-				Value:          d.Get("body").(string),
-				Representation: "storage",
-			},
-		},
-		Title: d.Get("title").(string),
-	}
+	contentRequest := contentFromResourceData(d)
 	var contentResponse Content
 	err := client.Post("/wiki/rest/api/content", contentRequest, &contentResponse)
 	if err != nil {
@@ -113,34 +101,14 @@ func resourceContentRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return err
 	}
-	d.SetId(contentResponse.Id)
-	d.Set("type", contentResponse.Type)
-	d.Set("space", contentResponse.Space.Key)
-	d.Set("body", contentResponse.Body.Storage.Value)
-	d.Set("title", contentResponse.Title)
-	d.Set("version", contentResponse.Version.Number)
-	d.Set("url", client.URL(contentResponse.Links.Context+contentResponse.Links.WebUI))
+	updateResourceDataFromContent(d, &contentResponse, client)
 	return nil
 }
 
 func resourceContentUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-	contentRequest := Content{
-		Type: d.Get("type").(string),
-		Space: &Space{
-			Key: d.Get("space").(string),
-		},
-		Body: &Body{
-			Storage: &Storage{
-				Value:          d.Get("body").(string),
-				Representation: "storage",
-			},
-		},
-		Title: d.Get("title").(string),
-		Version: &Version{
-			Number: d.Get("version").(int) + 1,
-		},
-	}
+	contentRequest := contentFromResourceData(d)
+	contentRequest.Version.Number++
 	var contentResponse Content
 	err := client.Put("/wiki/rest/api/content/"+d.Id(), contentRequest, &contentResponse)
 	if err != nil {
@@ -158,6 +126,37 @@ func resourceContentDelete(d *schema.ResourceData, m interface{}) error {
 	}
 	// d.SetId("") is automatically called assuming delete returns no errors
 	return nil
+}
+
+func contentFromResourceData(d *schema.ResourceData) *Content {
+	result := &Content{
+		Type: d.Get("type").(string),
+		Space: &Space{
+			Key: d.Get("space").(string),
+		},
+		Body: &Body{
+			Storage: &Storage{
+				Value:          d.Get("body").(string),
+				Representation: "storage",
+			},
+		},
+		Title: d.Get("title").(string),
+	}
+	version := d.Get("version").(int) // Get returns 0 if unset
+	if version > 0 {
+		result.Version = &Version{Number: version}
+	}
+	return result
+}
+
+func updateResourceDataFromContent(d *schema.ResourceData, content *Content, client *Client) {
+	d.SetId(content.Id)
+	d.Set("type", content.Type)
+	d.Set("space", content.Space.Key)
+	d.Set("body", content.Body.Storage.Value)
+	d.Set("title", content.Title)
+	d.Set("version", content.Version.Number)
+	d.Set("url", client.URL(content.Links.Context+content.Links.WebUI))
 }
 
 // Body was showing as requiring changes when there weren't any. It appears there
