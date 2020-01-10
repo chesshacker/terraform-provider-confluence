@@ -1,4 +1,4 @@
-package main
+package confluence
 
 import (
 	"bytes"
@@ -17,15 +17,15 @@ type Client struct {
 }
 
 type NewClientInput struct {
-	instance string
-	user     string
-	token    string
+	site  string
+	user  string
+	token string
 }
 
 func NewClient(input *NewClientInput) (*Client, error) {
 	publicURL := url.URL{
 		Scheme: "https",
-		Host:   input.instance + ".atlassian.net",
+		Host:   input.site + ".atlassian.net",
 	}
 	baseURL := publicURL
 	baseURL.User = url.UserPassword(input.user, input.token)

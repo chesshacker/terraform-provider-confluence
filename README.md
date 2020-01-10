@@ -1,53 +1,84 @@
-# Terraform Provider for Confluence
+Terraform Provider for Confluence
+=================================
 
-On more than one occassion, I have wished for an easy way to update Confluence
-Cloud pages from code. Terraform seems like a helpful tool to accomplish this
-task, but I didn't see any providers for Confluence, so I built one. This works
-for me, but it is pretty raw. I plan to overhall the file structure to make it
-match most of the conventions used by the official terraform providers.
+- Website: https://www.terraform.io
+- [![Gitter chat](https://badges.gitter.im/hashicorp-terraform/Lobby.png)](https://gitter.im/hashicorp-terraform/Lobby)
+- Mailing list: [Google Groups](http://groups.google.com/group/terraform-tool)
 
-## How to use it?
+<img src="https://cdn.rawgit.com/hashicorp/terraform-website/master/content/source/assets/images/logo-hashicorp.svg" width="600px">
 
-To build the terraform provider, you should have a recent version of Go
-installed. Building with `make` will create the terraform-provider-confluence
-binary in this directory. Terraform looks in the current directory for custom
-providers. If you wish to use it in other terraform projects, `make install`
-will copy it to your `~/terraform.d/plugins` directory, making it generally
-available from any directory on your computer.
+Requirements
+------------
 
-The provider requires a few pieces of information to authenticate with
-Confluence. To try out the `example.tf` file, you need to copy the
-`terraform.template.tfvars` file to `terraform.tfvars` and replace the
-placeholders with your settings. The `instance` and `space` can be found in the
-URL on confluence.
+-	[Terraform](https://www.terraform.io/downloads.html) 0.10.x
+-	[Go](https://golang.org/doc/install) 1.11 (to build the provider plugin)
+
+Usage
+---------------------
 
 ```
-https://*your_instance*.atlassian.net/wiki/spaces/*your_space*/...
+# For example, restrict confluence version in 0.1.x
+provider "confluence" {
+  version = "~> 0.1"
+}
 ```
 
-`user` is your email, and `token` can be generated in [Your Account
-Management](https://id.atlassian.com/manage/api-tokens).
+Building The Provider
+---------------------
 
+Clone repository to: `$GOPATH/src/github.com/terraform-providers/terraform-provider-confluence`
 
-After building the provider and creating `terraform.tfvars` you are ready to run
-the example, which will build a Confluence page containing a list of your pets.
-See `example.tf` to understand how the provider and page are constructed. Then
-run the following commands:
-
-```
-terraform init
-terraform apply
+```sh
+$ mkdir -p $GOPATH/src/github.com/terraform-providers; cd $GOPATH/src/github.com/terraform-providers
+$ git clone git@github.com:terraform-providers/terraform-provider-confluence
 ```
 
-Note that the outputs include a URL you can use to visit your page directly.
-Feel free to update the `example.tf` or `example.tmpl` files and re-apply to see
-your changes applied to the Confluence page. When you are done, you can run
-`terraform destroy` to delete the Confluence page.
+Enter the provider directory and build the provider
 
-## Helpful Resources
+```sh
+$ cd $GOPATH/src/github.com/terraform-providers/terraform-provider-confluence
+$ make build
+```
 
-* [Confluence REST API Reference](https://docs.atlassian.com/atlassian-confluence/REST/1000.0.0-SNAPSHOT/)
-* [Confluence Basic Auth for REST APIs](https://developer.atlassian.com/cloud/confluence/basic-auth-for-rest-apis/)
-* [Confluence Storage Format](https://confluence.atlassian.com/doc/confluence-storage-format-790796544.html)
-* [Terraform Provider Plugins](https://www.terraform.io/docs/plugins/provider.html)
-* [Extending Terraform Docs](https://www.terraform.io/docs/extend/index.html)
+Using the provider
+----------------------
+
+To use a released provider in your Terraform environment, run [`terraform init`](https://www.terraform.io/docs/commands/init.html) and Terraform will automatically install the provider. To specify a particular provider version when installing released providers, see the [Terraform documentation on provider versioning](https://www.terraform.io/docs/configuration/providers.html#version-provider-versions).
+
+To instead use a custom-built provider in your Terraform environment (e.g. the provider binary from the build instructions above), follow the instructions to [install it as a plugin.](https://www.terraform.io/docs/plugins/basics.html#installing-a-plugin) After placing it into your plugins directory,  run `terraform init` to initialize it.
+
+For either installation method, documentation about the provider specific configuration options can be found on the [provider's website](https://www.terraform.io/docs/providers/aws/index.html).
+
+Developing the Provider
+---------------------------
+
+If you wish to work on the provider, you'll first need [Go](http://www.golang.org) installed on your machine (version 1.11+ is *required*). You'll also need to correctly setup a [GOPATH](http://golang.org/doc/code.html#GOPATH), as well as adding `$GOPATH/bin` to your `$PATH`.
+
+To compile the provider, run `make build`. This will build the provider and put the provider binary in the `$GOPATH/bin` directory.
+
+```sh
+$ make build
+...
+$ $GOPATH/bin/terraform-provider-confluence
+...
+```
+
+In order to test the provider, you can simply run `make test`.
+
+```sh
+$ make test
+```
+
+In order to run the full suite of Acceptance tests, run `make testacc`.
+
+*Note:* Acceptance tests create real content in Confluence.
+
+```sh
+$ make testacc
+```
+
+Contributing
+------------
+
+Contributions are welcome! Please read the contribution guidelines [Contributing to Terraform - Confluence Provider](.github/CONTRIBUTING.md)
+

@@ -1,9 +1,9 @@
-package main
+package confluence
 
 import (
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
+	"github.com/hashicorp/terraform/helper/schema"
 )
 
 type Body struct {
@@ -55,9 +55,10 @@ func resourceContent() *schema.Resource {
 				Default:  "page",
 			},
 			"space": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				DefaultFunc: schema.EnvDefaultFunc("CONFLUENCE_SPACE", nil),
 			},
 			"body": &schema.Schema{
 				Type:             schema.TypeString,
@@ -96,7 +97,7 @@ func resourceContentRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	var contentResponse Content
 	u := "/wiki/rest/api/content/" + d.Id() + "?expand=space,body.storage,version"
-	err := client.Get(u, &contentResponse)
+	err := client.Get(u, &contentResponse) // TODO: contentResponse, err := client.GetContent(d.Id()) ?
 	if err != nil {
 		d.SetId("")
 		return err

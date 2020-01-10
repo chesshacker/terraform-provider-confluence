@@ -7,9 +7,9 @@ resource "random_pet" "pets" {
 }
 
 provider "confluence" {
-  instance = var.instance
-  user     = var.user
-  token    = var.token
+  site  = var.site
+  user  = var.user
+  token = var.token
 }
 
 resource confluence_content "example" {
@@ -21,13 +21,13 @@ resource confluence_content "example" {
 }
 
 terraform {
-  required_version = "v0.12.18"
+  required_version = "~> v0.12.0"
   required_providers {
     random = "~> 2.2"
   }
 }
 
-variable "instance" {
+variable "site" {
   type = string
 }
 
