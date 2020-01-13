@@ -5,8 +5,9 @@ import (
 	"github.com/hashicorp/terraform/terraform"
 )
 
+// Provider returns the ResourceProvider for Confluence
 func Provider() terraform.ResourceProvider {
-	p := &schema.Provider{
+	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"site": {
 				Type:        schema.TypeString,
@@ -31,21 +32,14 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"confluence_content": resourceContent(),
 		},
+		ConfigureFunc: providerConfigure,
 	}
-	p.ConfigureFunc = providerConfigure(p)
-	return p
 }
 
-func providerConfigure(p *schema.Provider) schema.ConfigureFunc {
-	return func(d *schema.ResourceData) (interface{}, error) {
-		meta, err := NewClient(&NewClientInput{
-			site:  d.Get("site").(string),
-			token: d.Get("token").(string),
-			user:  d.Get("user").(string),
-		})
-		if err != nil {
-			return nil, err
-		}
-		return meta, nil
-	}
+func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+	return NewClient(&NewClientInput{
+		site:  d.Get("site").(string),
+		token: d.Get("token").(string),
+		user:  d.Get("user").(string),
+	}), nil
 }

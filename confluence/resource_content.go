@@ -6,10 +6,12 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+// Body is part of Content
 type Body struct {
 	Storage *Storage `json:"storage,omitempty"`
 }
 
+// Content is a primary resource in Confluence
 type Content struct {
 	Id      string        `json:"id,omitempty"`
 	Type    string        `json:"type,omitempty"`
@@ -20,20 +22,24 @@ type Content struct {
 	Links   *ContentLinks `json:"_links,omitempty"`
 }
 
+// ContentLinks is part of Content
 type ContentLinks struct {
 	Context string `json:"context,omitempty"`
 	WebUI   string `json:"webui,omitempty"`
 }
 
+// Space is part of Content
 type Space struct {
 	Key string `json:"key,omitempty"`
 }
 
+// Storage is part of Body
 type Storage struct {
 	Value          string `json:"value,omitempty"`
 	Representation string `json:"representation,omitempty"`
 }
 
+// Version is part of Content
 type Version struct {
 	Number int `json:"number,omitempty"`
 }

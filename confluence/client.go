@@ -10,19 +10,22 @@ import (
 	"time"
 )
 
+// Client provides a connection to the Confluence API
 type Client struct {
 	client    *http.Client
 	baseURL   *url.URL
 	publicURL *url.URL
 }
 
+// NewClientInput provides information to connect to the Confluence API
 type NewClientInput struct {
 	site  string
 	user  string
 	token string
 }
 
-func NewClient(input *NewClientInput) (*Client, error) {
+// NewClient returns an authenticated client ready to use
+func NewClient(input *NewClientInput) *Client {
 	publicURL := url.URL{
 		Scheme: "https",
 		Host:   input.site + ".atlassian.net",
@@ -35,25 +38,30 @@ func NewClient(input *NewClientInput) (*Client, error) {
 		},
 		baseURL:   &baseURL,
 		publicURL: &publicURL,
-	}, nil
+	}
 }
 
+// Post uses the client to send a POST request
 func (c *Client) Post(path string, body interface{}, result interface{}) error {
 	return c.do("POST", path, body, result)
 }
 
+// Get uses the client to send a GET request
 func (c *Client) Get(path string, result interface{}) error {
 	return c.do("GET", path, nil, result)
 }
 
+// Put uses the client to send a PUT request
 func (c *Client) Put(path string, body interface{}, result interface{}) error {
 	return c.do("PUT", path, body, result)
 }
 
+// Delete uses the client to send a DELETE request
 func (c *Client) Delete(path string) error {
 	return c.do("DELETE", path, nil, nil)
 }
 
+// do uses the client to send a specified request
 func (c *Client) do(method string, path string, body interface{}, result interface{}) error {
 	u, err := c.baseURL.Parse(path)
 	if err != nil {
@@ -97,6 +105,7 @@ func (c *Client) do(method string, path string, body interface{}, result interfa
 	return nil
 }
 
+// URL returns the public URL for a given path
 func (c *Client) URL(path string) string {
 	u, err := c.publicURL.Parse(path)
 	if err != nil {

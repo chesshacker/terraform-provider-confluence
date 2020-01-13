@@ -44,20 +44,13 @@ func TestAccConfluenceContent_Updated(t *testing.T) {
 
 func testAccCheckConfluenceContentDestroy(s *terraform.State) error {
 	client := testAccProvider.Meta().(*Client)
-
-	if err := confluenceContentDestroyHelper(s, client); err != nil {
-		return err
-	}
-	return nil
+	return confluenceContentDestroyHelper(s, client)
 }
 
 func testAccCheckConfluenceContentExists(n string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*Client)
-		if err := confluenceContentExistsHelper(s, client); err != nil {
-			return err
-		}
-		return nil
+		return confluenceContentExistsHelper(s, client)
 	}
 }
 
