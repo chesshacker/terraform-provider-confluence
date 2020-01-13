@@ -2,3 +2,4 @@ terraform.tfvars
 terraform-provider-confluence
 .terraform
 terraform.tfstate*
+/site
