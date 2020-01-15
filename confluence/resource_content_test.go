@@ -21,7 +21,7 @@ func TestAccConfluenceContent_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"confluence_content.default", "title", "Example Page"),
 					resource.TestCheckResourceAttr(
-						"confluence_content.default", "body", "<p>This page was built with Terraform<p>"),
+						"confluence_content.default", "body", "<p>This page was built with Terraform</p>"),
 					resource.TestCheckResourceAttr(
 						"confluence_content.default", "version", "1"),
 				),
@@ -33,7 +33,7 @@ func TestAccConfluenceContent_Updated(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"confluence_content.default", "title", "Updated Page"),
 					resource.TestCheckResourceAttr(
-						"confluence_content.default", "body", "<p>This page was built with Terraform<p>"),
+						"confluence_content.default", "body", "<p>This page was built with Terraform</p>"),
 					resource.TestCheckResourceAttr(
 						"confluence_content.default", "version", "2"),
 				),
@@ -57,14 +57,14 @@ func testAccCheckConfluenceContentExists(n string) resource.TestCheckFunc {
 const testAccCheckConfluenceContentConfigRequired = `
 resource confluence_content "default" {
   title = "Example Page"
-  body  = "<p>This page was built with Terraform<p>"
+  body  = "<p>This page was built with Terraform</p>"
 }
 `
 
 const testAccCheckConfluenceContentConfigUpdated = `
 resource confluence_content "default" {
   title = "Updated Page"
-  body  = "<p>This page was built with Terraform<p>"
+  body  = "<p>This page was built with Terraform</p>"
 }
 `
 
