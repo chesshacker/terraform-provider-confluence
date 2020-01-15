@@ -1,5 +1,5 @@
-# Copy this file as terraform.tfvars and customize the values
-# site and space can be found in the URL for the space you want to use
+# Copy this file as terraform.tfvars and customize the values.
+# "site" and "space" can be found in the confluence URL
 # https://my-site.atlassian.net/wiki/spaces/MYSPACE/...
 
 site  = "my-site"                  # part of the URL before "atlassian.net"

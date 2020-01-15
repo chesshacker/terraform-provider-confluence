@@ -1,5 +1,11 @@
-terraform.tfvars
+# ignore build products
 terraform-provider-confluence
+/site
+
+# ignore confluence secrets
+terraform.tfvars
+secrets.env
+
+# ignore some things terraform could produce in the examples
 .terraform
 terraform.tfstate*
-/site

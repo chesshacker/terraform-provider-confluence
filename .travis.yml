@@ -1,3 +1,6 @@
+# This project isn't using travis yet, but hanging onto this file for reference
+# A future PR will probably enable a GitHub action to do something similar
+
 dist: trusty
 sudo: required
 services:
@@ -5,8 +8,6 @@ services:
 language: go
 go:
 - 1.11.x
-env:
-  GOFLAGS=-mod=vendor
 
 install:
 # This script is used by the Travis build to install a cookie for
@@ -18,7 +19,6 @@ install:
 script:
 - make test
 - make vet
-- make website-test
 
 branches:
   only:
