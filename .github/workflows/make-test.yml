@@ -14,6 +14,11 @@ jobs:
       uses: actions/setup-go@v1
       with:
         go-version: 1.13
+    - name: Cache golangci-lint
+      uses: actions/cache@preview
+      with:
+        path: bin
+        key: ${{ runner.os }}-golangci-lint-${{ hashFiles('scripts/get-golangci.sh') }}
     - name: Cache Go modules
       uses: actions/cache@preview
       with:
@@ -23,11 +28,13 @@ jobs:
           ${{ runner.OS }}-build-${{ env.cache-name }}-
           ${{ runner.OS }}-build-
           ${{ runner.OS }}-
+    - name: Check
+      run: make check
     - name: Build
       env:
         GOPROXY: "https://proxy.golang.org"
-      run: make
-    - name: Test
+      run: make build
+    - name: Unit Test
       run: make test
     - name: Acceptance Test
       env:

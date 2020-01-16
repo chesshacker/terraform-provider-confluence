@@ -1,4 +1,0 @@
-# var-naming takes a whitelist and blacklist of initialisms
-# Ignoring ID because YouTube uses Id instead of ID and I'd prefer to match
-[rule.var-naming]
-  arguments = [["ID"], []]

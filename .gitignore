@@ -1,6 +1,7 @@
 # ignore build products
-terraform-provider-confluence
+/bin
 /site
+/terraform-provider-confluence
 
 # ignore confluence secrets
 terraform.tfvars

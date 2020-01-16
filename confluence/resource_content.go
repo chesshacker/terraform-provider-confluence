@@ -55,31 +55,31 @@ func resourceContent() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "page",
 			},
-			"space": &schema.Schema{
+			"space": {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CONFLUENCE_SPACE", nil),
 			},
-			"body": &schema.Schema{
+			"body": {
 				Type:             schema.TypeString,
 				Required:         true,
 				DiffSuppressFunc: resourceContentDiffBody,
 			},
-			"title": &schema.Schema{
+			"title": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"version": &schema.Schema{
+			"version": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"url": &schema.Schema{
+			"url": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
@@ -108,8 +108,7 @@ func resourceContentRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return err
 	}
-	updateResourceDataFromContent(d, &contentResponse, client)
-	return nil
+	return updateResourceDataFromContent(d, &contentResponse, client)
 }
 
 func resourceContentUpdate(d *schema.ResourceData, m interface{}) error {
@@ -156,14 +155,23 @@ func contentFromResourceData(d *schema.ResourceData) *Content {
 	return result
 }
 
-func updateResourceDataFromContent(d *schema.ResourceData, content *Content, client *Client) {
+func updateResourceDataFromContent(d *schema.ResourceData, content *Content, client *Client) error {
 	d.SetId(content.Id)
-	d.Set("type", content.Type)
-	d.Set("space", content.Space.Key)
-	d.Set("body", content.Body.Storage.Value)
-	d.Set("title", content.Title)
-	d.Set("version", content.Version.Number)
-	d.Set("url", client.URL(content.Links.Context+content.Links.WebUI))
+	m := map[string]interface{}{
+		"type":    content.Type,
+		"space":   content.Space.Key,
+		"body":    content.Body.Storage.Value,
+		"title":   content.Title,
+		"version": content.Version.Number,
+		"url":     client.URL(content.Links.Context + content.Links.WebUI),
+	}
+	for k, v := range m {
+		err := d.Set(k, v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Body was showing as requiring changes when there weren't any. It appears there
