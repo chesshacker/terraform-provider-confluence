@@ -1,0 +1,38 @@
+name: Build and Test
+on:
+  pull_request:
+  push:
+    branches-ignore:
+      - gh-pages
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Setup Go
+      uses: actions/setup-go@v1
+      with:
+        go-version: 1.13
+    - name: Cache Go modules
+      uses: actions/cache@preview
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.OS }}-build-${{ env.cache-name }}-
+          ${{ runner.OS }}-build-
+          ${{ runner.OS }}-
+    - name: Build
+      env:
+        GOPROXY: "https://proxy.golang.org"
+      run: make
+    - name: Test
+      run: make test
+    - name: Acceptance Test
+      env:
+        CONFLUENCE_SITE: ${{ secrets.CONFLUENCE_SITE }}
+        CONFLUENCE_USER: ${{ secrets.CONFLUENCE_USER }}
+        CONFLUENCE_TOKEN: ${{ secrets.CONFLUENCE_TOKEN }}
+        CONFLUENCE_SPACE: ${{ secrets.CONFLUENCE_SPACE }}
+      run: make testacc
