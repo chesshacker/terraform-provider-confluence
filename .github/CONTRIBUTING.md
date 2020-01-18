@@ -47,3 +47,10 @@ mkdocs serve
 
 This project hasn't committed to a versioned release yet, but plans to do
 releases in the future.
+
+## Helpful Resources
+
+* [Confluence REST API Reference](https://docs.atlassian.com/atlassian-confluence/REST/1000.0.0-SNAPSHOT/)
+* [Confluence Basic Auth for REST APIs](https://developer.atlassian.com/cloud/confluence/basic-auth-for-rest-apis/)
+* [Terraform Provider Plugins](https://www.terraform.io/docs/plugins/provider.html)
+* [Extending Terraform Docs](https://www.terraform.io/docs/extend/index.html)
