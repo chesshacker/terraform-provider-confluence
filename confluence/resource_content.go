@@ -6,44 +6,6 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
-// Body is part of Content
-type Body struct {
-	Storage *Storage `json:"storage,omitempty"`
-}
-
-// Content is a primary resource in Confluence
-type Content struct {
-	Id      string        `json:"id,omitempty"`
-	Type    string        `json:"type,omitempty"`
-	Title   string        `json:"title,omitempty"`
-	Space   *Space        `json:"space,omitempty"`
-	Version *Version      `json:"version,omitempty"`
-	Body    *Body         `json:"body,omitempty"`
-	Links   *ContentLinks `json:"_links,omitempty"`
-}
-
-// ContentLinks is part of Content
-type ContentLinks struct {
-	Context string `json:"context,omitempty"`
-	WebUI   string `json:"webui,omitempty"`
-}
-
-// Space is part of Content
-type Space struct {
-	Key string `json:"key,omitempty"`
-}
-
-// Storage is part of Body
-type Storage struct {
-	Value          string `json:"value,omitempty"`
-	Representation string `json:"representation,omitempty"`
-}
-
-// Version is part of Content
-type Version struct {
-	Number int `json:"number,omitempty"`
-}
-
 func resourceContent() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceContentCreate,
@@ -90,8 +52,7 @@ func resourceContent() *schema.Resource {
 func resourceContentCreate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	contentRequest := contentFromResourceData(d)
-	var contentResponse Content
-	err := client.Post("/wiki/rest/api/content", contentRequest, &contentResponse)
+	contentResponse, err := client.CreateContent(contentRequest)
 	if err != nil {
 		return err
 	}
@@ -101,22 +62,18 @@ func resourceContentCreate(d *schema.ResourceData, m interface{}) error {
 
 func resourceContentRead(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-	var contentResponse Content
-	u := "/wiki/rest/api/content/" + d.Id() + "?expand=space,body.storage,version"
-	err := client.Get(u, &contentResponse) // TODO: contentResponse, err := client.GetContent(d.Id()) ?
+	contentResponse, err := client.GetContent(d.Id())
 	if err != nil {
 		d.SetId("")
 		return err
 	}
-	return updateResourceDataFromContent(d, &contentResponse, client)
+	return updateResourceDataFromContent(d, contentResponse, client)
 }
 
 func resourceContentUpdate(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
 	contentRequest := contentFromResourceData(d)
-	contentRequest.Version.Number++
-	var contentResponse Content
-	err := client.Put("/wiki/rest/api/content/"+d.Id(), contentRequest, &contentResponse)
+	_, err := client.UpdateContent(contentRequest)
 	if err != nil {
 		d.SetId("")
 		return err
@@ -126,7 +83,7 @@ func resourceContentUpdate(d *schema.ResourceData, m interface{}) error {
 
 func resourceContentDelete(d *schema.ResourceData, m interface{}) error {
 	client := m.(*Client)
-	err := client.Delete("/wiki/rest/api/content/" + d.Id())
+	err := client.DeleteContent(d.Id())
 	if err != nil {
 		return err
 	}
