@@ -93,6 +93,7 @@ func resourceContentDelete(d *schema.ResourceData, m interface{}) error {
 
 func contentFromResourceData(d *schema.ResourceData) *Content {
 	result := &Content{
+		Id:   d.Id(),
 		Type: d.Get("type").(string),
 		Space: &Space{
 			Key: d.Get("space").(string),

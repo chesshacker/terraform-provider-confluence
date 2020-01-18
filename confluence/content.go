@@ -1,6 +1,8 @@
 package confluence
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Body is part of Content
 type Body struct {

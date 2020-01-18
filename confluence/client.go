@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -22,6 +23,18 @@ type NewClientInput struct {
 	site  string
 	user  string
 	token string
+}
+
+// ErrorResponse describes why a request failed
+type ErrorResponse struct {
+	StatusCode int `json:"statusCode,omitempty"`
+	Data       struct {
+		Authorized bool     `json:"authorized,omitempty"`
+		Valid      bool     `json:"valid,omitempty"`
+		Errors     []string `json:"errors,omitempty"`
+		Successful bool     `json:"successful,omitempty"`
+	} `json:"data,omitempty"`
+	Message string `json:"message,omitempty"`
 }
 
 // NewClient returns an authenticated client ready to use
@@ -68,8 +81,9 @@ func (c *Client) do(method string, path string, body interface{}, result interfa
 		return err
 	}
 	var bodyReader io.Reader
+	var bodyBytes []byte
 	if body != nil {
-		bodyBytes, err := json.Marshal(body)
+		bodyBytes, err = json.Marshal(body)
 		if err != nil {
 			return err
 		}
@@ -94,7 +108,14 @@ func (c *Client) do(method string, path string, body interface{}, result interfa
 		"DELETE": 204,
 	}
 	if resp.StatusCode != expectedStatusCode[method] {
-		return fmt.Errorf("HTTP %s request error. Response code: %d", method, resp.StatusCode)
+		var errResponse ErrorResponse
+		err = json.NewDecoder(resp.Body).Decode(&errResponse)
+		if err != nil {
+			return fmt.Errorf("%s\n\n%s %s\n%s\n\n%v",
+				resp.Status, method, path, string(bodyBytes), err)
+		}
+		return fmt.Errorf("%s\n\n%s %s\n%s\n\n%s",
+			resp.Status, method, path, string(bodyBytes), &errResponse)
 	}
 	if result != nil {
 		err = json.NewDecoder(resp.Body).Decode(&result)
@@ -103,6 +124,16 @@ func (c *Client) do(method string, path string, body interface{}, result interfa
 		}
 	}
 	return nil
+}
+
+func (e *ErrorResponse) String() string {
+	d := e.Data
+	var errorsString string
+	if len(d.Errors) > 0 {
+		errorsString = fmt.Sprintf("\n  * %s", strings.Join(d.Errors, "\n  * "))
+	}
+	return fmt.Sprintf("%s\nAuthorized: %t\nValid: %t\nSuccessful: %t%s",
+		e.Message, d.Authorized, d.Valid, d.Successful, errorsString)
 }
 
 // URL returns the public URL for a given path
