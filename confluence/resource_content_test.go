@@ -4,36 +4,38 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccConfluenceContent_Updated(t *testing.T) {
+	rName := acctest.RandomWithPrefix("resource_content_test_")
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckConfluenceContentDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckConfluenceContentConfigRequired,
+				Config: testAccCheckConfluenceContentConfigRequired(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckConfluenceContentExists("confluence_content.default"),
 					resource.TestCheckResourceAttr(
-						"confluence_content.default", "title", "Example Page"),
+						"confluence_content.default", "title", rName),
 					resource.TestCheckResourceAttr(
-						"confluence_content.default", "body", "<p>This page was built with Terraform</p>"),
+						"confluence_content.default", "body", "Original value"),
 					resource.TestCheckResourceAttr(
 						"confluence_content.default", "version", "1"),
 				),
 			},
 			{
-				Config: testAccCheckConfluenceContentConfigUpdated,
+				Config: testAccCheckConfluenceContentConfigUpdated(rName),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckConfluenceContentExists("confluence_content.default"),
 					resource.TestCheckResourceAttr(
-						"confluence_content.default", "title", "Updated Page"),
+						"confluence_content.default", "title", rName),
 					resource.TestCheckResourceAttr(
-						"confluence_content.default", "body", "<p>This page was built with Terraform</p>"),
+						"confluence_content.default", "body", "Updated value"),
 					resource.TestCheckResourceAttr(
 						"confluence_content.default", "version", "2"),
 				),
@@ -54,26 +56,28 @@ func testAccCheckConfluenceContentExists(n string) resource.TestCheckFunc {
 	}
 }
 
-const testAccCheckConfluenceContentConfigRequired = `
+func testAccCheckConfluenceContentConfigRequired(rName string) string {
+	return fmt.Sprintf(`
 resource confluence_content "default" {
-  title = "Example Page"
-  body  = "<p>This page was built with Terraform</p>"
+  title = "%s"
+  body  = "Original value"
 }
-`
+`, rName)
+}
 
-const testAccCheckConfluenceContentConfigUpdated = `
-resource confluence_content "default" {
-  title = "Updated Page"
-  body  = "<p>This page was built with Terraform</p>"
+func testAccCheckConfluenceContentConfigUpdated(rName string) string {
+	return fmt.Sprintf(`
+	resource confluence_content "default" {
+		title = "%s"
+		body  = "Updated value"
+	}
+	`, rName)
 }
-`
 
 func confluenceContentDestroyHelper(s *terraform.State, client *Client) error {
 	for _, r := range s.RootModule().Resources {
 		id := r.Primary.ID
-		var contentResponse Content
-		u := "/wiki/rest/api/content/" + id + "?expand=space,body.storage,version"
-		err := client.Get(u, &contentResponse)
+		_, err := client.GetContent(id)
 		if err == nil {
 			return fmt.Errorf("Content still exists. id: %s", id)
 		}
@@ -84,9 +88,7 @@ func confluenceContentDestroyHelper(s *terraform.State, client *Client) error {
 func confluenceContentExistsHelper(s *terraform.State, client *Client) error {
 	for _, r := range s.RootModule().Resources {
 		id := r.Primary.ID
-		var contentResponse Content
-		u := "/wiki/rest/api/content/" + id + "?expand=space,body.storage,version"
-		err := client.Get(u, &contentResponse)
+		_, err := client.GetContent(id)
 		if err != nil {
 			return fmt.Errorf("Received an error retrieving content %s", err)
 		}
