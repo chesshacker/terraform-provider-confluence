@@ -3,6 +3,7 @@ package confluence
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
@@ -66,6 +67,7 @@ resource confluence_content "default" {
 }
 
 func testAccCheckConfluenceContentConfigUpdated(rName string) string {
+	time.Sleep(time.Second)
 	return fmt.Sprintf(`
 	resource confluence_content "default" {
 		title = "%s"
