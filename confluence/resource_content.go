@@ -45,6 +45,12 @@ func resourceContent() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"parent": {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Default:          "",
+				DiffSuppressFunc: resourceContentDiffParent,
+			},
 		},
 	}
 }
@@ -110,6 +116,15 @@ func contentFromResourceData(d *schema.ResourceData) *Content {
 	if version > 0 {
 		result.Version = &Version{Number: version}
 	}
+	parent := d.Get("parent").(string)
+	if parent != "" {
+		result.Ancestors = []*Content{
+			&Content{
+				Id:   parent,
+				Type: "page",
+			},
+		}
+	}
 	return result
 }
 
@@ -122,6 +137,7 @@ func updateResourceDataFromContent(d *schema.ResourceData, content *Content, cli
 		"title":   content.Title,
 		"version": content.Version.Number,
 		"url":     client.URL(content.Links.Context + content.Links.WebUI),
+		"parent":  content.Ancestors[0].Id,
 	}
 	for k, v := range m {
 		err := d.Set(k, v)
@@ -137,4 +153,10 @@ func updateResourceDataFromContent(d *schema.ResourceData, content *Content, cli
 // false differences by comparing the trimmed strings
 func resourceContentDiffBody(k, old, new string, d *schema.ResourceData) bool {
 	return strings.TrimSpace(old) == strings.TrimSpace(new)
+}
+
+// If the parent was not set, running diff will show the actual value for old and
+// the empty value for new. This case is supressed.
+func resourceContentDiffParent(k, old, new string, d *schema.ResourceData) bool {
+	return (new == "") || (old == new)
 }

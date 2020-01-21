@@ -11,13 +11,14 @@ type Body struct {
 
 // Content is a primary resource in Confluence
 type Content struct {
-	Id      string        `json:"id,omitempty"`
-	Type    string        `json:"type,omitempty"`
-	Title   string        `json:"title,omitempty"`
-	Space   *Space        `json:"space,omitempty"`
-	Version *Version      `json:"version,omitempty"`
-	Body    *Body         `json:"body,omitempty"`
-	Links   *ContentLinks `json:"_links,omitempty"`
+	Id        string        `json:"id,omitempty"`
+	Type      string        `json:"type,omitempty"`
+	Title     string        `json:"title,omitempty"`
+	Space     *Space        `json:"space,omitempty"`
+	Version   *Version      `json:"version,omitempty"`
+	Body      *Body         `json:"body,omitempty"`
+	Links     *ContentLinks `json:"_links,omitempty"`
+	Ancestors []*Content    `json:"ancestors,omitempty`
 }
 
 // ContentLinks is part of Content
@@ -52,7 +53,7 @@ func (c *Client) CreateContent(content *Content) (*Content, error) {
 
 func (c *Client) GetContent(id string) (*Content, error) {
 	var response Content
-	path := fmt.Sprintf("/wiki/rest/api/content/%s?expand=space,body.storage,version", id)
+	path := fmt.Sprintf("/wiki/rest/api/content/%s?expand=space,body.storage,version,ancestors", id)
 	if err := c.Get(path, &response); err != nil {
 		return nil, err
 	}

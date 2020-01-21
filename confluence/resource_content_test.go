@@ -11,7 +11,7 @@ import (
 )
 
 func TestAccConfluenceContent_Updated(t *testing.T) {
-	rName := acctest.RandomWithPrefix("resource_content_test_")
+	rName := acctest.RandomWithPrefix("resource-content-test")
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
@@ -27,6 +27,37 @@ func TestAccConfluenceContent_Updated(t *testing.T) {
 						"confluence_content.default", "body", "Original value"),
 					resource.TestCheckResourceAttr(
 						"confluence_content.default", "version", "1"),
+				),
+			},
+			{
+				Config: testAccCheckConfluenceContentConfigUpdated(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckConfluenceContentExists("confluence_content.default"),
+					resource.TestCheckResourceAttr(
+						"confluence_content.default", "title", rName),
+					resource.TestCheckResourceAttr(
+						"confluence_content.default", "body", "Updated value"),
+					resource.TestCheckResourceAttr(
+						"confluence_content.default", "version", "2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccConfluenceContent_Parent(t *testing.T) {
+	rName := acctest.RandomWithPrefix("resource-content-test")
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckConfluenceContentDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckConfluenceContentConfigParent(rName),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckConfluenceContentExists("confluence_content.parent"),
+					testAccCheckConfluenceContentExists("confluence_content.child"),
+					resource.TestCheckResourceAttrSet("confluence_content.child", "parent"),
 				),
 			},
 			{
@@ -74,6 +105,20 @@ func testAccCheckConfluenceContentConfigUpdated(rName string) string {
 		body  = "Updated value"
 	}
 	`, rName)
+}
+
+func testAccCheckConfluenceContentConfigParent(rName string) string {
+	return fmt.Sprintf(`
+	resource confluence_content "parent" {
+		title = "%s-parent"
+		body  = "parent"
+	}
+	resource confluence_content "child" {
+		title  = "%s-child"
+		body   = "child"
+		parent = confluence_content.parent.id
+	}
+	`, rName, rName)
 }
 
 func confluenceContentDestroyHelper(s *terraform.State, client *Client) error {
