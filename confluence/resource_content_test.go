@@ -57,19 +57,8 @@ func TestAccConfluenceContent_Parent(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckConfluenceContentExists("confluence_content.parent"),
 					testAccCheckConfluenceContentExists("confluence_content.child"),
-					resource.TestCheckResourceAttrSet("confluence_content.child", "parent"),
-				),
-			},
-			{
-				Config: testAccCheckConfluenceContentConfigUpdated(rName),
-				Check: resource.ComposeTestCheckFunc(
-					testAccCheckConfluenceContentExists("confluence_content.default"),
-					resource.TestCheckResourceAttr(
-						"confluence_content.default", "title", rName),
-					resource.TestCheckResourceAttr(
-						"confluence_content.default", "body", "Updated value"),
-					resource.TestCheckResourceAttr(
-						"confluence_content.default", "version", "2"),
+					resource.TestCheckResourceAttrPair("confluence_content.child", "parent",
+						"confluence_content.parent", "id"),
 				),
 			},
 		},

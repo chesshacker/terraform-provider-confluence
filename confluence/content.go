@@ -18,7 +18,7 @@ type Content struct {
 	Version   *Version      `json:"version,omitempty"`
 	Body      *Body         `json:"body,omitempty"`
 	Links     *ContentLinks `json:"_links,omitempty"`
-	Ancestors []*Content    `json:"ancestors,omitempty`
+	Ancestors []*Content    `json:"ancestors,omitempty"`
 }
 
 // ContentLinks is part of Content

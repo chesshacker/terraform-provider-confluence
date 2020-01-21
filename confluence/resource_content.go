@@ -119,7 +119,7 @@ func contentFromResourceData(d *schema.ResourceData) *Content {
 	parent := d.Get("parent").(string)
 	if parent != "" {
 		result.Ancestors = []*Content{
-			&Content{
+			{
 				Id:   parent,
 				Type: "page",
 			},
@@ -137,7 +137,7 @@ func updateResourceDataFromContent(d *schema.ResourceData, content *Content, cli
 		"title":   content.Title,
 		"version": content.Version.Number,
 		"url":     client.URL(content.Links.Context + content.Links.WebUI),
-		"parent":  content.Ancestors[0].Id,
+		"parent":  content.Ancestors[len(content.Ancestors)-1].Id, // the last ancestor is the parent
 	}
 	for k, v := range m {
 		err := d.Set(k, v)
