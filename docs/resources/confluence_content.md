@@ -14,9 +14,10 @@ Provides a piece of content on your Confluence site.
 
 ```hcl
 resource confluence_content "default" {
-  space = "my-space"
-  title = "Example Page"
-  body  = "<p>This page was built with Terraform<p>"
+  space  = "my-space"
+  title  = "Example Page"
+  body   = "<p>This page was built with Terraform<p>"
+  parent = "123456"
 }
 ```
 
@@ -26,6 +27,10 @@ The following arguments are supported:
 
 * `body` - (Required) The actual content of the page in [Confluence Storage
   Format](https://confluence.atlassian.com/doc/confluence-storage-format-790796544.html)
+
+* `parent` - (Optional) The content id of the parent page. If unset, terraform
+  will leave it as-is, which could be the default location (under the space's
+  home page) or any other location the page has been manually moved.
 
 * `space` - (Required) The space key to create the content under. This can also
   be set via the `CONFLUENCE_SPACE` environment variable.
@@ -39,6 +44,8 @@ The following arguments are supported:
 This resource exports the following attributes:
 
 * `body` - The actual content of the page in Confluence Storage Format.
+
+* `parent` - The content id of the parent page.
 
 * `space` - The space key the content is under.
 
