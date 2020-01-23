@@ -125,9 +125,10 @@
 <p>Provides a piece of content on your Confluence site.</p>
 <h2 id="example-usage">Example Usage</h2>
 <pre><code class="hcl">resource confluence_content &quot;default&quot; {
-  space = &quot;my-space&quot;
-  title = &quot;Example Page&quot;
-  body  = &quot;&lt;p&gt;This page was built with Terraform&lt;p&gt;&quot;
+  space  = &quot;my-space&quot;
+  title  = &quot;Example Page&quot;
+  body   = &quot;&lt;p&gt;This page was built with Terraform&lt;p&gt;&quot;
+  parent = &quot;123456&quot;
 }
 </code></pre>
 
@@ -137,6 +138,11 @@
 <li>
 <p><code>body</code> - (Required) The actual content of the page in <a href="https://confluence.atlassian.com/doc/confluence-storage-format-790796544.html">Confluence Storage
   Format</a></p>
+</li>
+<li>
+<p><code>parent</code> - (Optional) The content id of the parent page. If unset, terraform
+  will leave it as-is, which could be the default location (under the space's
+  home page) or any other location the page has been manually moved.</p>
 </li>
 <li>
 <p><code>space</code> - (Required) The space key to create the content under. This can also
@@ -154,6 +160,9 @@
 <ul>
 <li>
 <p><code>body</code> - The actual content of the page in Confluence Storage Format.</p>
+</li>
+<li>
+<p><code>parent</code> - The content id of the parent page.</p>
 </li>
 <li>
 <p><code>space</code> - The space key the content is under.</p>
