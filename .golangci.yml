@@ -4,5 +4,6 @@ linters:
     - golint
 issues:
   exclude:
-    - struct field `Id` should be `ID`
+    - struct field `\w*Id` should be `\w*ID`
     - method parameter `\w*Id` should be `\w*ID`
+    - var `\w*Id` should be `\w*ID`

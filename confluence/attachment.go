@@ -25,7 +25,7 @@ type AttachmentLinks struct {
 	Download string `json:"download,omitempty"` // prefix with Context
 }
 
-func (c *Client) CreateAttachment(attachment *Attachment, data string, pageId string) (*Attachment, error) {
+func (c *Client) CreateAttachment(attachment *Attachment, data, pageId string) (*Attachment, error) {
 	var response Attachment
 	path := fmt.Sprintf("/wiki/rest/api/content/%s/child/attachment", pageId)
 	// TODO: need to modify Post to handle multipart form data
@@ -44,7 +44,7 @@ func (c *Client) GetAttachment(id string) (*Attachment, error) {
 	return &response, nil
 }
 
-func (c *Client) UpdateAttachment(attachment *Attachment, pageId string) (*Attachment, error) {
+func (c *Client) UpdateAttachment(attachment *Attachment, data, pageId string) (*Attachment, error) {
 	var response Attachment
 	attachment.Version.Number++
 	path := fmt.Sprintf("/wiki/rest/api/content/%s/child/attachment/%s", pageId, attachment.Id)

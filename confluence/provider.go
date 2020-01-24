@@ -30,7 +30,8 @@ func Provider() terraform.ResourceProvider {
 		},
 		DataSourcesMap: map[string]*schema.Resource{},
 		ResourcesMap: map[string]*schema.Resource{
-			"confluence_content": resourceContent(),
+			"confluence_content":    resourceContent(),
+			"confluence_attachment": resourceAttachment(),
 		},
 		ConfigureFunc: providerConfigure,
 	}
