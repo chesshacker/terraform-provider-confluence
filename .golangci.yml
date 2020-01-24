@@ -5,3 +5,4 @@ linters:
 issues:
   exclude:
     - struct field `Id` should be `ID`
+    - method parameter `\w*Id` should be `\w*ID`
