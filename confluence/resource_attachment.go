@@ -23,7 +23,7 @@ func resourceAttachment() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"mediaType": {
+			"media_type": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Default:  "text/plain",
@@ -92,7 +92,7 @@ func attachmentFromResourceData(d *schema.ResourceData) *Attachment {
 		Id:   d.Id(),
 		Type: "attachment",
 		Metadata: &Metadata{
-			MediaType: d.Get("mediaType").(string),
+			MediaType: d.Get("media_type").(string),
 		},
 		Title: d.Get("title").(string),
 	}
@@ -106,9 +106,9 @@ func attachmentFromResourceData(d *schema.ResourceData) *Attachment {
 func updateResourceDataFromAttachment(d *schema.ResourceData, attachment *Attachment, client *Client) error {
 	d.SetId(attachment.Id)
 	m := map[string]interface{}{
-		"title":     attachment.Title,
-		"version":   attachment.Version.Number,
-		"mediaType": attachment.Metadata.MediaType,
+		"title":      attachment.Title,
+		"version":    attachment.Version.Number,
+		"media_type": attachment.Metadata.MediaType,
 	}
 	for k, v := range m {
 		err := d.Set(k, v)
