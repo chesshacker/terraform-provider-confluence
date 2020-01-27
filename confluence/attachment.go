@@ -28,8 +28,7 @@ type AttachmentLinks struct {
 func (c *Client) CreateAttachment(attachment *Attachment, data, pageId string) (*Attachment, error) {
 	var response Attachment
 	path := fmt.Sprintf("/wiki/rest/api/content/%s/child/attachment", pageId)
-	// TODO: need to modify Post to handle multipart form data
-	if err := c.Post(path, attachment, &response); err != nil {
+	if err := c.PostForm(path, attachment.Title, data, &response); err != nil {
 		return nil, err
 	}
 	return &response, nil
@@ -48,7 +47,7 @@ func (c *Client) UpdateAttachment(attachment *Attachment, data, pageId string) (
 	var response Attachment
 	attachment.Version.Number++
 	path := fmt.Sprintf("/wiki/rest/api/content/%s/child/attachment/%s", pageId, attachment.Id)
-	if err := c.Put(path, attachment, &response); err != nil {
+	if err := c.PutForm(path, attachment.Title, data, &response); err != nil {
 		return nil, err
 	}
 	return &response, nil
