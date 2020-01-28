@@ -116,6 +116,9 @@ func formBytesBuffer(filename, body string) (*bytes.Buffer, string, error) {
 	bodyBytes := &bytes.Buffer{}
 	writer := multipart.NewWriter(bodyBytes)
 	part, err := writer.CreateFormFile("file", filename)
+	if err != nil {
+		return nil, "", err
+	}
 	_, err = io.WriteString(part, body)
 	if err != nil {
 		return nil, "", err
