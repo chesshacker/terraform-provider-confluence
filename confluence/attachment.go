@@ -1,8 +1,13 @@
 package confluence
 
 import (
+	"errors"
 	"fmt"
 )
+
+type AttachmentResults struct {
+	Results []Attachment `json:"results,omitempty"`
+}
 
 // Attachment is a primary resource in Confluence
 type Attachment struct {
@@ -26,12 +31,28 @@ type AttachmentLinks struct {
 }
 
 func (c *Client) CreateAttachment(attachment *Attachment, data, pageId string) (*Attachment, error) {
-	var response Attachment
+	var response AttachmentResults
 	path := fmt.Sprintf("/wiki/rest/api/content/%s/child/attachment", pageId)
 	if err := c.PostForm(path, attachment.Title, data, &response); err != nil {
 		return nil, err
 	}
-	return &response, nil
+	if len(response.Results) != 1 {
+		return nil, errors.New("Unexpected number of results returned when creating attachment")
+	}
+	return &response.Results[0], nil
+}
+
+func (c *Client) UpdateAttachment(attachment *Attachment, data, pageId string) (*Attachment, error) {
+	var response AttachmentResults
+	attachment.Version.Number++
+	path := fmt.Sprintf("/wiki/rest/api/content/%s/child/attachment/%s", pageId, attachment.Id)
+	if err := c.PutForm(path, attachment.Title, data, &response); err != nil {
+		return nil, err
+	}
+	if len(response.Results) != 1 {
+		return nil, errors.New("Unexpected number of results returned when updating attachment")
+	}
+	return &response.Results[0], nil
 }
 
 func (c *Client) GetAttachment(id string) (*Attachment, error) {
@@ -43,18 +64,8 @@ func (c *Client) GetAttachment(id string) (*Attachment, error) {
 	return &response, nil
 }
 
-func (c *Client) UpdateAttachment(attachment *Attachment, data, pageId string) (*Attachment, error) {
-	var response Attachment
-	attachment.Version.Number++
-	path := fmt.Sprintf("/wiki/rest/api/content/%s/child/attachment/%s", pageId, attachment.Id)
-	if err := c.PutForm(path, attachment.Title, data, &response); err != nil {
-		return nil, err
-	}
-	return &response, nil
-}
-
 func (c *Client) DeleteAttachment(id, pageId string) error {
-	path := fmt.Sprintf("/wiki/rest/api/content/%s/child/attachment/%s", pageId, id)
+	path := fmt.Sprintf("/wiki/rest/api/content/%s", id)
 	if err := c.Delete(path); err != nil {
 		return err
 	}
