@@ -1,6 +1,7 @@
 PKG_NAME=confluence
 BINARY_NAME=terraform-provider-confluence
 INSTALL_DIR=$(HOME)/.terraform.d/plugins
+VERSION=$$(cat VERSION)
 TEST?=$$(go list ./...)
 GOFMT_FILES?=$$(find . -name '*.go')
 
@@ -32,7 +33,7 @@ clean:
 
 install: $(BINARY_NAME)
 	mkdir -p $(INSTALL_DIR)
-	cp $(BINARY_NAME) $(INSTALL_DIR)
+	cp $(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)_$(VERSION)
 
 uninstall:
 	rm -f $(INSTALL_DIR)/$(BINARY_NAME)
