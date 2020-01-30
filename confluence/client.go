@@ -55,6 +55,17 @@ func NewClient(input *NewClientInput) *Client {
 	}
 }
 
+// GetString uses the client to send a GET request and returns a string
+func (c *Client) GetString(path string) (string, error) {
+	body := new(bytes.Buffer)
+	responseBody, err := c.doRaw("GET", path, "", body)
+	if err != nil {
+		return "", err
+	}
+	result := responseBody.String()
+	return result, nil
+}
+
 // Get uses the client to send a GET request
 func (c *Client) Get(path string, result interface{}) error {
 	body := new(bytes.Buffer)
@@ -111,6 +122,14 @@ func jsonBytesBuffer(body interface{}) (*bytes.Buffer, error) {
 	return bytes.NewBuffer(bodyBytes), nil
 }
 
+func bytesBufferJSON(bodyBytes *bytes.Buffer, result interface{}) error {
+	if result == nil {
+		return nil
+	}
+	reader := bytes.NewReader(bodyBytes.Bytes())
+	return json.NewDecoder(reader).Decode(&result)
+}
+
 // formBytesBuffer returns the body as a multi-part form and the content type
 func formBytesBuffer(filename, body string) (*bytes.Buffer, string, error) {
 	bodyBytes := &bytes.Buffer{}
@@ -130,15 +149,23 @@ func formBytesBuffer(filename, body string) (*bytes.Buffer, string, error) {
 	return bodyBytes, writer.FormDataContentType(), nil
 }
 
-// do uses the client to send a specified request
 func (c *Client) do(method, path, contentType string, body *bytes.Buffer, result interface{}) error {
-	u, err := c.baseURL.Parse(path)
+	responseBody, err := c.doRaw(method, path, contentType, body)
 	if err != nil {
 		return err
 	}
+	return bytesBufferJSON(responseBody, result)
+}
+
+// do uses the client to send a specified request
+func (c *Client) doRaw(method, path, contentType string, body *bytes.Buffer) (*bytes.Buffer, error) {
+	u, err := c.baseURL.Parse(path)
+	if err != nil {
+		return nil, err
+	}
 	req, err := http.NewRequest(method, u.String(), body)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if contentType != "" {
 		req.Header.Set("Content-Type", contentType)
@@ -146,7 +173,7 @@ func (c *Client) do(method, path, contentType string, body *bytes.Buffer, result
 	req.Header.Add("X-Atlassian-Token", "nocheck")
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 	expectedStatusCode := map[string]int{
@@ -165,16 +192,15 @@ func (c *Client) do(method, path, contentType string, body *bytes.Buffer, result
 			responseBody = errResponse.String()
 		}
 		s := body.String()
-		return fmt.Errorf("%s\n\n%s %s\n%s\n\n%s",
+		return nil, fmt.Errorf("%s\n\n%s %s\n%s\n\n%s",
 			resp.Status, method, path, s, responseBody)
 	}
-	if result != nil {
-		err = json.NewDecoder(resp.Body).Decode(&result)
-		if err != nil {
-			return err
-		}
+	result := new(bytes.Buffer)
+	_, err = result.ReadFrom(resp.Body)
+	if err != nil {
+		return nil, err
 	}
-	return nil
+	return result, nil
 }
 
 func (e *ErrorResponse) String() string {

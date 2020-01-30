@@ -3,11 +3,9 @@ package confluence
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
 
 func TestAccConfluenceContent_Updated(t *testing.T) {
@@ -15,12 +13,12 @@ func TestAccConfluenceContent_Updated(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckConfluenceContentDestroy,
+		CheckDestroy: testAccCheckConfluenceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckConfluenceContentConfigRequired(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckConfluenceContentExists("confluence_content.default"),
+					testAccCheckConfluenceExists("confluence_content.default"),
 					resource.TestCheckResourceAttr(
 						"confluence_content.default", "title", rName),
 					resource.TestCheckResourceAttr(
@@ -32,7 +30,7 @@ func TestAccConfluenceContent_Updated(t *testing.T) {
 			{
 				Config: testAccCheckConfluenceContentConfigUpdated(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckConfluenceContentExists("confluence_content.default"),
+					testAccCheckConfluenceExists("confluence_content.default"),
 					resource.TestCheckResourceAttr(
 						"confluence_content.default", "title", rName),
 					resource.TestCheckResourceAttr(
@@ -50,31 +48,19 @@ func TestAccConfluenceContent_Parent(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckConfluenceContentDestroy,
+		CheckDestroy: testAccCheckConfluenceDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccCheckConfluenceContentConfigParent(rName),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckConfluenceContentExists("confluence_content.parent"),
-					testAccCheckConfluenceContentExists("confluence_content.child"),
+					testAccCheckConfluenceExists("confluence_content.parent"),
+					testAccCheckConfluenceExists("confluence_content.child"),
 					resource.TestCheckResourceAttrPair("confluence_content.child", "parent",
 						"confluence_content.parent", "id"),
 				),
 			},
 		},
 	})
-}
-
-func testAccCheckConfluenceContentDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*Client)
-	return confluenceContentDestroyHelper(s, client)
-}
-
-func testAccCheckConfluenceContentExists(n string) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*Client)
-		return confluenceContentExistsHelper(s, client)
-	}
 }
 
 func testAccCheckConfluenceContentConfigRequired(rName string) string {
@@ -87,7 +73,6 @@ resource confluence_content "default" {
 }
 
 func testAccCheckConfluenceContentConfigUpdated(rName string) string {
-	time.Sleep(time.Second)
 	return fmt.Sprintf(`
 	resource confluence_content "default" {
 		title = "%s"
@@ -108,26 +93,4 @@ func testAccCheckConfluenceContentConfigParent(rName string) string {
 		parent = confluence_content.parent.id
 	}
 	`, rName, rName)
-}
-
-func confluenceContentDestroyHelper(s *terraform.State, client *Client) error {
-	for _, r := range s.RootModule().Resources {
-		id := r.Primary.ID
-		_, err := client.GetContent(id)
-		if err == nil {
-			return fmt.Errorf("Content still exists. id: %s", id)
-		}
-	}
-	return nil
-}
-
-func confluenceContentExistsHelper(s *terraform.State, client *Client) error {
-	for _, r := range s.RootModule().Resources {
-		id := r.Primary.ID
-		_, err := client.GetContent(id)
-		if err != nil {
-			return fmt.Errorf("Received an error retrieving content %s", err)
-		}
-	}
-	return nil
 }

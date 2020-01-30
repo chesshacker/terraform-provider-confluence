@@ -60,6 +60,15 @@ func resourceAttachmentRead(d *schema.ResourceData, m interface{}) error {
 		d.SetId("")
 		return err
 	}
+	attachmentData, err := client.GetAttachmentBody(attachmentResponse)
+	if err != nil {
+		d.SetId("")
+		return err
+	}
+	err = d.Set("data", attachmentData)
+	if err != nil {
+		return err
+	}
 	return updateResourceDataFromAttachment(d, attachmentResponse, client)
 }
 

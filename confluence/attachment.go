@@ -64,6 +64,15 @@ func (c *Client) GetAttachment(id string) (*Attachment, error) {
 	return &response, nil
 }
 
+func (c *Client) GetAttachmentBody(attachment *Attachment) (string, error) {
+	path := attachment.Links.Context + attachment.Links.Download
+	result, err := c.GetString(path)
+	if err != nil {
+		return "", err
+	}
+	return result, nil
+}
+
 func (c *Client) DeleteAttachment(id, pageId string) error {
 	path := fmt.Sprintf("/wiki/rest/api/content/%s", id)
 	if err := c.Delete(path); err != nil {
