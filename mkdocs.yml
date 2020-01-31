@@ -4,5 +4,6 @@ repo_url: https://github.com/chesshacker/terraform-provider-confluence
 nav:
 - Getting Started: index.md
 - Resources:
+  - confluence_attachment: resources/confluence_attachment.md
   - confluence_content: resources/confluence_content.md
 theme: readthedocs

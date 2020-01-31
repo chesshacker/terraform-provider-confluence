@@ -33,7 +33,7 @@ clean:
 
 install: $(BINARY_NAME)
 	mkdir -p $(INSTALL_DIR)
-	cp $(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)_$(VERSION)
+	cp $(BINARY_NAME) $(INSTALL_DIR)/$(BINARY_NAME)_v$(VERSION)
 
 uninstall:
 	rm -f $(INSTALL_DIR)/$(BINARY_NAME)
