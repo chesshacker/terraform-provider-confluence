@@ -43,9 +43,9 @@ Static credentials must be passed to the provider block.
   set via the `CONFLUENCE_SITE` environment variable.
 
 * `user` - (Required) The user is your user's email address. This can also be
-  set via the `CONFLUENCE_SITE` environment variable.
+  set via the `CONFLUENCE_USER` environment variable.
 
 * `token` - (Required) The token is a secret every user can generate. It is
   similar to a password and should be treated as such. This can also be set via
-  the `CONFLUENCE_SITE` environment variable. See [Manage your
+  the `CONFLUENCE_TOKEN` environment variable. See [Manage your
   account](https://id.atlassian.com/manage/api-tokens).
