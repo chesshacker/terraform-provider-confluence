@@ -21,7 +21,7 @@ $(BINARY_NAME):
 	go build -v -o $(BINARY_NAME)
 
 testacc:
-	TF_ACC=1 source secrets.env && go test $(TEST) -v $(TESTARGS) -timeout 5m
+	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 5m
 
 fmt:
 	gofmt -s -w $(GOFMT_FILES)
