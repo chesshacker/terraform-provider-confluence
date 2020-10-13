@@ -65,8 +65,7 @@ func (c *Client) GetAttachment(id string) (*Attachment, error) {
 }
 
 func (c *Client) GetAttachmentBody(attachment *Attachment) (string, error) {
-	path := attachment.Links.Context + attachment.Links.Download
-	result, err := c.GetString(path)
+	result, err := c.GetString(attachment.Links.Download)
 	if err != nil {
 		return "", err
 	}
