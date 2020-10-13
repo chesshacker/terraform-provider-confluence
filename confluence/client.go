@@ -16,14 +16,19 @@ import (
 type Client struct {
 	client    *http.Client
 	baseURL   *url.URL
+	basePath  string
 	publicURL *url.URL
 }
 
 // NewClientInput provides information to connect to the Confluence API
 type NewClientInput struct {
-	site  string
-	user  string
-	token string
+	site             string
+	siteScheme       string
+	publicSite       string
+	publicSiteScheme string
+	context          string
+	user             string
+	token            string
 }
 
 // ErrorResponse describes why a request failed
@@ -41,16 +46,30 @@ type ErrorResponse struct {
 // NewClient returns an authenticated client ready to use
 func NewClient(input *NewClientInput) *Client {
 	publicURL := url.URL{
-		Scheme: "https",
-		Host:   input.site + ".atlassian.net",
+		Scheme: input.publicSiteScheme,
+		Host:   input.site,
 	}
-	baseURL := publicURL
+	if input.publicSite != "" {
+		publicURL.Host = input.publicSite
+	}
+
+	basePath := input.context
+
+	// Default to /wiki if using Confluence Cloud`
+	if strings.HasSuffix(input.site, ".atlassian.net") {
+		basePath = "/wiki"
+	}
+	baseURL := url.URL{
+		Scheme: input.siteScheme,
+		Host:   input.site,
+	}
 	baseURL.User = url.UserPassword(input.user, input.token)
 	return &Client{
 		client: &http.Client{
 			Timeout: time.Second * 10,
 		},
 		baseURL:   &baseURL,
+		basePath:  basePath,
 		publicURL: &publicURL,
 	}
 }
@@ -159,7 +178,8 @@ func (c *Client) do(method, path, contentType string, body *bytes.Buffer, result
 
 // do uses the client to send a specified request
 func (c *Client) doRaw(method, path, contentType string, body *bytes.Buffer) (*bytes.Buffer, error) {
-	u, err := c.baseURL.Parse(path)
+	fullPath := c.basePath + path
+	u, err := c.baseURL.Parse(fullPath)
 	if err != nil {
 		return nil, err
 	}
@@ -193,7 +213,7 @@ func (c *Client) doRaw(method, path, contentType string, body *bytes.Buffer) (*b
 		}
 		s := body.String()
 		return nil, fmt.Errorf("%s\n\n%s %s\n%s\n\n%s",
-			resp.Status, method, path, s, responseBody)
+			resp.Status, method, fullPath, s, responseBody)
 	}
 	result := new(bytes.Buffer)
 	_, err = result.ReadFrom(resp.Body)

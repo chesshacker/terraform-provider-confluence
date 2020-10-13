@@ -26,13 +26,13 @@ type Metadata struct {
 
 // AttachmentLinks is part of Content
 type AttachmentLinks struct {
-	Context  string `json:"context,omitempty"`  // "/wiki"
+	Context  string `json:"context,omitempty"`  // ""
 	Download string `json:"download,omitempty"` // prefix with Context
 }
 
 func (c *Client) CreateAttachment(attachment *Attachment, data, pageId string) (*Attachment, error) {
 	var response AttachmentResults
-	path := fmt.Sprintf("/wiki/rest/api/content/%s/child/attachment", pageId)
+	path := fmt.Sprintf("/rest/api/content/%s/child/attachment", pageId)
 	if err := c.PostForm(path, attachment.Title, data, &response); err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (c *Client) CreateAttachment(attachment *Attachment, data, pageId string) (
 func (c *Client) UpdateAttachment(attachment *Attachment, data, pageId string) (*Attachment, error) {
 	var response AttachmentResults
 	attachment.Version.Number++
-	path := fmt.Sprintf("/wiki/rest/api/content/%s/child/attachment/%s", pageId, attachment.Id)
+	path := fmt.Sprintf("/rest/api/content/%s/child/attachment/%s", pageId, attachment.Id)
 	if err := c.PutForm(path, attachment.Title, data, &response); err != nil {
 		return nil, err
 	}
@@ -57,7 +57,7 @@ func (c *Client) UpdateAttachment(attachment *Attachment, data, pageId string) (
 
 func (c *Client) GetAttachment(id string) (*Attachment, error) {
 	var response Attachment
-	path := fmt.Sprintf("/wiki/rest/api/content/%s?expand=version", id)
+	path := fmt.Sprintf("/rest/api/content/%s?expand=version", id)
 	if err := c.Get(path, &response); err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (c *Client) GetAttachmentBody(attachment *Attachment) (string, error) {
 }
 
 func (c *Client) DeleteAttachment(id, pageId string) error {
-	path := fmt.Sprintf("/wiki/rest/api/content/%s", id)
+	path := fmt.Sprintf("/rest/api/content/%s", id)
 	if err := c.Delete(path); err != nil {
 		return err
 	}
