@@ -28,7 +28,7 @@ provider "confluence" {
 resource confluence_content "default" {
   space = "MYSPACE"
   title = "Example Page"
-  body  = "<p>This page was built with Terraform<p>"
+  body  = "<p>This page was built with Terraform</p>"
 }
 ```
 
